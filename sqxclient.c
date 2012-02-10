@@ -4,7 +4,7 @@
 
 /*
 sqxclient.c - a tiny, simple chat client for use with the Squirrel Express chat server
-Author: Håkon Vågsether
+Author: Håkon Vågsether <hauk142@gmail.com>
 */
 
 void *stdRead(int *fd);
