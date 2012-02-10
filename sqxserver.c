@@ -10,7 +10,7 @@
 
 /*
 sqxserver.c - a tiny, simple chat server for use with the Squirrel Express chat client
-Author: Håkon Vågsether
+Author: Håkon Vågsether <hauk142@gmail.com>
 */
 
 int sock; // declare main socket
