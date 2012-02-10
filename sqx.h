@@ -7,7 +7,7 @@
 
 /* 
 sqx.h - a header file for the squirrel express server/client
-Author: hauk142
+Author: Håkon Vågsether <hauk142@gmail.com>
 */
 
 int errorExit(char *failDesc) // function for exiting on error
