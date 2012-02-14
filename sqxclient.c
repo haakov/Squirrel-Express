@@ -21,8 +21,7 @@ int main(int argc, char *argv[]) // main function
 	/* {{{ Command-line arguments */
 	if (!(strcmp(argv[1], "--help")||strcmp(argv[1], "-h"))) {
 		printf("Squirrel Express client 0.1 pre-alpha, a simple chat client for use with the Squirrel Express server.\n");
-		printf("This program has so far only been tested on Arch Linux 32 bit.\n");
-		printf("Developer can be contacted at hauk142 AT users DOT sf DOT net.\n");
+		printf("Developer can be contacted at hauk142 AT gmail DOT com.\n");
 		printf("\n");
 		printf("Usage: sqxc <options> <IP address> <port number>\n");
 		printf("Options:\n");
