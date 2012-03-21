@@ -1,8 +1,6 @@
-#include <string.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/epoll.h>
-#include <unistd.h>
 #include <strings.h>
 #include "sqx.h"
 
@@ -23,7 +21,7 @@ void nonBlock(int fd);
 
 int main(int argc, char *argv[]) // main function
 {
-	/* TODO: implement epoll */
+	/* TODO: implement epoll */             /* stfu */
 	/* TODO: Declaration sector starts here */
 	int yes=1; // for Beej's "address in use"-loser
 	int bindSock, portNum=33730, e; // socket for binding to the port. Also, lets have our portnumber as a variable, so we can change it later with the "-p" flag. An extra e integer for error checking

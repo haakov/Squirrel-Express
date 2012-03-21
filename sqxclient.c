@@ -8,18 +8,17 @@ Author: Håkon Vågsether <hauk142@gmail.com>
 */
 
 void *stdRead(int *fd);
+int sock; // TEH MAIN SOCKET
 void cleanExit();
 
 int main(int argc, char *argv[]) // main function
 {
 	/* {{{ Declarations */
-	int sock; // TEH MAIN SOCKET
 	pthread_t stdRead_T; // thread (stdRead.c)
-	char username[32];
 	/* {{{ */
 
 	/* {{{ Command-line arguments */
-	if (!(strcmp(argv[1], "--help")||strcmp(argv[1], "-h"))) {
+	if (argc<1 && (!(strcmp(argv[1], "--help")||strcmp(argv[1], "-h")))) {
 		printf("Squirrel Express Client, a simple chat client for use with the Squirrel Express server.\n");
 		printf("Developer can be contacted at hauk142 AT gmail DOT com.\n");
 		printf("\n");
@@ -48,8 +47,8 @@ int main(int argc, char *argv[]) // main function
 		errorExit("socket()");
 	}
 
-	cleanExit();	
-	return 0;
+	cleanExit();                            /* Die and exit */
+	return 0;                               /* You will never get here >:) */
 }
 
 	

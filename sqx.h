@@ -4,6 +4,11 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <signal.h>
+#include <unistd.h>
+#include <string.h>
+
+#ifndef SQX_H
+#define SQX_H
 
 /* 
 sqx.h - a header file for the squirrel express server/client
@@ -16,4 +21,4 @@ int errorExit(char *failDesc) // function for exiting on error
 	exit(EXIT_FAILURE);
 }
 
-
+#endif
