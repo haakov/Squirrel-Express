@@ -1,6 +1,8 @@
 #include <pthread.h>
 #include <ncurses.h>
+#include <netdb.h>
 #include "sqx.h"
+#include <netinet/in.h>
 
 /*
 sqxclient.c - a tiny, simple chat client for use with the Squirrel Express chat server
@@ -8,9 +10,10 @@ Author: Håkon Vågsether <hauk142@gmail.com>
 */
 
 void *stdRead(int *fd);
-int sock; // TEH MAIN SOCKET
+int sock, port; // TEH MAIN SOCKET
 void cleanExit();
 struct hostent *servur;                         /* The struct hostent pointer called servur */
+struct sockaddr_in serverAddress;               /* The server's address, in a sockaddr_in struct */
 
 int main(int argc, char *argv[]) // main function
 {
@@ -47,7 +50,19 @@ int main(int argc, char *argv[]) // main function
 	if (sock<0) {
 		errorExit("socket()");
 	}
-
+	servur = gethostbyname(argv[1]);
+	if(servur == NULL)
+	{
+		errorExit("gethostbyname()");   /* Everybody luvs error checking */
+	}
+    	bzero((char *) &serverAddress, sizeof(serverAddress));
+	serverAddress.sin_family = AF_INET;
+    	bcopy((char *)servur->h_addr, (char *)&serverAddress.sin_addr.s_addr, servur->h_length);
+	serverAddress.sin_port = htons(port = atoi(argv[2]));
+    	if (connect(sock,(struct sockaddr *) &serverAddress, sizeof(serverAddress)) < 0) 
+	{
+		errorExit("connect()");
+	}
 
 	cleanExit();                            /* Die and exit */
 	return 0;                               /* You will never get here >:) */

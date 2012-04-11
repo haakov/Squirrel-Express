@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <string.h>
+#include <strings.h>
 
 #ifndef SQX_H
 #define SQX_H
