@@ -10,6 +10,7 @@ Author: Håkon Vågsether <hauk142@gmail.com>
 void *stdRead(int *fd);
 int sock; // TEH MAIN SOCKET
 void cleanExit();
+struct hostent *servur;                         /* The struct hostent pointer called servur */
 
 int main(int argc, char *argv[]) // main function
 {
@@ -29,7 +30,7 @@ int main(int argc, char *argv[]) // main function
 		exit(EXIT_SUCCESS);
 	}
 	else if (argc!=3) {
-		printf("Usage: sqxc <options> <IP address> <port number>\n");
+		printf("Usage: sqxc <IP address> <port number> <options>\n");
 		exit(EXIT_FAILURE);
 	}
 	/* }}} */
@@ -46,6 +47,7 @@ int main(int argc, char *argv[]) // main function
 	if (sock<0) {
 		errorExit("socket()");
 	}
+
 
 	cleanExit();                            /* Die and exit */
 	return 0;                               /* You will never get here >:) */
