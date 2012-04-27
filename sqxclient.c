@@ -9,17 +9,16 @@ sqxclient.c - a tiny, simple chat client for use with the Squirrel Express chat 
 Author: Håkon Vågsether <hauk142@gmail.com>
 */
 
-void *stdRead(int *fd);
+//void *stdRead(int *fd);
 int sock, port; // TEH MAIN SOCKET
 void cleanExit();
 struct hostent *servur;                         /* The struct hostent pointer called servur */
 struct sockaddr_in serverAddress;               /* The server's address, in a sockaddr_in struct */
+char buf[20];
 
 int main(int argc, char *argv[]) // main function
 {
-	/* {{{ Declarations */
-	pthread_t stdRead_T; // thread (stdRead.c)
-	/* {{{ */
+	//pthread_t stdRead_T; // thread (stdRead.c)
 
 	/* {{{ Command-line arguments */
 	if (argc<1 && (!(strcmp(argv[1], "--help")||strcmp(argv[1], "-h")))) {
@@ -64,28 +63,30 @@ int main(int argc, char *argv[]) // main function
 		errorExit("connect()");
 	}
 
+	scanf("%s", buf);
+	write(sock, buf, sizeof(buf));
+
 	cleanExit();                            /* Die and exit */
 	return 0;                               /* You will never get here >:) */
 }
 
 	
-	
+/*	
 void *stdRead(int *fd)
 {
 	char buffer[512];
 
 	while (true) {
 		fgets(buffer, sizeof(buffer), stdin); // receive user input
-		/* TODO: Add nick to message? */
 		write(fd, buffer, sizeof(buffer)); // write to server
 	}
 }
-
+*/
 
 void cleanExit()
 {
 	close(sock);
 	
-	printf("\nExiting!\n");
+	printf("Closing connection...\n");
 	exit(EXIT_SUCCESS);
 }

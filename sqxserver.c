@@ -11,13 +11,25 @@ sqxserver.c - a tiny, simple chat server for use with the Squirrel Express chat 
 Author: hauk142
 */
 
-int sock; // declare main socket
+int sock, readSock, writeSock; // declare main socket
 struct epoll_event *events; // the pointer epoll_event struct
 
 
 void cleanExit();
 void nonBlock(int fd); 
 
+typedef struct // for communication between events[i].data.fd and the file descriptors to write to
+{
+	int in_use; // int to indicate if the integers below are in use
+	int rFd; // events[i].data.fd
+	int wFd; // file descriptor to write to
+} fd;
+fd fds[20];
+
+int cliCount=1;
+
+char closeMsg[] = "Warning: One of the clients has lost connection with the server.\n";
+char servCloseMsg[] = "Server has disconnected, farewell world!\n";
 
 int main(int argc, char *argv[]) // main function
 {
@@ -25,19 +37,11 @@ int main(int argc, char *argv[]) // main function
 	/* TODO: Declaration sector starts here */
 	int yes=1; // for Beej's "address in use"-loser
 	int bindSock, portNum=33730, e; // socket for binding to the port. Also, lets have our portnumber as a variable, so we can change it later with the "-p" flag. An extra e integer for error checking
-	int epfd, cliCount=1; // the EPOLL file descriptor, and an integer for keeping track of how many clients we have connected, so it doesn't exceed our limit, which is currently 20
+	int epfd; // the EPOLL file descriptor, and an integer for keeping track of how many clients we have connected, so it doesn't exceed our limit, which is currently 20
 	struct sockaddr_in servAddr; // sockaddr_in struct for the main socket
 	struct epoll_event event; // the normal epoll struct
-	char closeMsg[] = "Warning: One of the clients has lost connection with the server.\n";
 	events = calloc(MAXEVENTS, sizeof(event));
 	
-	typedef struct // for communication between events[i].data.fd and the file descriptors to write to
-	{
-		int in_use; // int to indicate if the integers below are in use
-		int rFd; // events[i].data.fd
-		int wFd; // file descriptor to write to
-	} fd;
-	fd fds[20];
 
 	/* Declaration sector ends here */
 	
@@ -174,7 +178,6 @@ int main(int argc, char *argv[]) // main function
 					while(1)
 					{
 						char buf[512];
-						int readSock, writeSock;
 						bzero(buf, sizeof(buf));
 						readSock = read(events[i].data.fd, buf, sizeof(buf)); // read :D
 						if(readSock == -1)
@@ -207,7 +210,7 @@ int main(int argc, char *argv[]) // main function
 						}
 						for(int u=0;u<20;u++)
 						{
-							if(fds[u].in_use==1)
+							if(fds[u].in_use)
 							{
 								writeSock = write(fds[u].wFd, buf, sizeof(buf));
 							}
@@ -245,6 +248,15 @@ void nonBlock(int fd) // fd to set to nonblocking mode
 
 void cleanExit()
 {
+	
+	for(int u=0;u<20;u++)
+	{
+		if(fds[u].in_use==1)
+		{
+			writeSock = write(fds[u].wFd, servCloseMsg, sizeof(servCloseMsg));
+		}
+	}
+	/* send shutdown message to all of the clients */
 	close(sock);
 	free(events);
 	for(int i=1;i<MAXEVENTS;i++)
