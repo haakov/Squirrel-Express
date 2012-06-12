@@ -16,6 +16,10 @@ struct hostent *servur;                         /* The struct hostent pointer ca
 struct sockaddr_in serverAddress;               /* The server's address, in a sockaddr_in struct */
 char buf[20];
 
+
+char closeMsg[] = "One of the clients has lost connection with the server.\n";
+char servCloseMsg[] = "Server has disconnected, farewell world!\n";
+
 int main(int argc, char *argv[]) // main function
 {
 	//pthread_t stdRead_T; // thread (stdRead.c)
