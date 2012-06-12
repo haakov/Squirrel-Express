@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) // main function
 							close(events[i].data.fd); // close the file descriptor
 							for(int u=0;u<20;u++)
 							{
-								if(fds[u].rFd == events[i].data.fd)
+								if(fds[u].wFd == events[i].data.fd)
 								{
 									fds[u].in_use = 0;
 								}
