@@ -9,7 +9,7 @@ sqxclient.c - a tiny, simple chat client for use with the Squirrel Express chat 
 Author: Håkon Vågsether <hauk142@gmail.com>
 */
 
-//void *stdRead(int *fd);
+void *stdRead(int *fd);
 int sock, port; // TEH MAIN SOCKET
 void cleanExit();
 struct hostent *servur;                         /* The struct hostent pointer called servur */
@@ -22,7 +22,7 @@ char servCloseMsg[] = "Server has disconnected, farewell world!\n";
 
 int main(int argc, char *argv[]) // main function
 {
-	//pthread_t stdRead_T; // thread (stdRead.c)
+	pthread_t stdRead_T; // thread (stdRead.c)
 
 	/* {{{ Command-line arguments */
 	if (argc<1 && (!(strcmp(argv[1], "--help")||strcmp(argv[1], "-h")))) {
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) // main function
 		exit(EXIT_FAILURE);
 	}
 	/* }}} */
-	signal(SIGINT, cleanExit); // Ctrl+C calls the cleanExit function :33
+	// signal(SIGINT, cleanExit); // Ctrl+C calls the cleanExit function :33
 /*	
 	This is supposed to be anonymous, right?
 	printf("Pick a username: "); // prompt for username
@@ -67,15 +67,18 @@ int main(int argc, char *argv[]) // main function
 		errorExit("connect()");
 	}
 
-	scanf("%s", buf);
+	//pthread_create(&stdRead_T, NULL, stdRead, &sock);
+
+	fgets(buf, strlen(buf), stdin);
 	write(sock, buf, sizeof(buf));
 
+	//pthread_join(stdRead_T, NULL);
 	cleanExit();                            /* Die and exit */
 	return 0;                               /* You will never get here >:) */
 }
 
 	
-/*	
+	
 void *stdRead(int *fd)
 {
 	char buffer[512];
@@ -85,7 +88,7 @@ void *stdRead(int *fd)
 		write(fd, buffer, sizeof(buffer)); // write to server
 	}
 }
-*/
+
 
 void cleanExit()
 {

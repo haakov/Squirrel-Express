@@ -5,6 +5,7 @@
 #include "sqx.h"
 
 #define MAXEVENTS 64
+#define SRVPREFIX "srv"
 
 /*
 sqxserver.c - a tiny, simple chat server for use with the Squirrel Express chat client
@@ -26,17 +27,17 @@ typedef struct // for communication between events[i].data.fd and the file descr
 } fd;
 fd fds[20];
 
-int cliCount=1;
+int cliCount=0;
 
-char closeMsg[] = "Warning: One of the clients has lost connection with the server.\n";
-char servCloseMsg[] = "Server has disconnected, farewell world!\n";
+char servCloseMsg[] = "srv close";
+char closeMsg[8]; // "srv 100" - 7 chars + one for \0
 
 int main(int argc, char *argv[]) // main function
 {
 	/* TODO: implement epoll */             /* stfu */
 	/* TODO: Declaration sector starts here */
 	int yes=1; // for Beej's "address in use"-loser
-	int bindSock, portNum=33730, e; // socket for binding to the port. Also, lets have our portnumber as a variable, so we can change it later with the "-p" flag. An extra e integer for error checking
+	int bindSock, portNum=33730, e; // socket for binding to the port. Also, lets have our portnumber as a variable, so we can change it later with the "-p" flag. An extra integer, e, for error checking
 	int epfd; // the EPOLL file descriptor, and an integer for keeping track of how many clients we have connected, so it doesn't exceed our limit, which is currently 20
 	struct sockaddr_in servAddr; // sockaddr_in struct for the main socket
 	struct epoll_event event; // the normal epoll struct
@@ -128,14 +129,14 @@ int main(int argc, char *argv[]) // main function
 		errorExit("epoll_ctl()");
 	}
 	
-	/* TODO: lo and behold, the mighty while loop! */
+	/* lo and behold, the mighty while loop! */
 	
 	while(1)
 	{
 		e = epoll_wait(epfd, events, MAXEVENTS, -1); // the epoll_wait call
-		for(int i=0;i<cliCount;i++)
+		for(int i=0;i<=cliCount;i++)
 		{
-			if(sock==events[i].data.fd) // we have activity on a listening socket, which means someone is trying to connect
+			if(sock==events[i].data.fd && cliCount<=100) // we have activity on a listening socket, which means someone is trying to connect. Accept unless we're full
 			{
 				int acceptSock; // the file descriptor for each client
 				struct sockaddr_in cliAddr; // the struct for the client address
@@ -199,6 +200,7 @@ int main(int argc, char *argv[]) // main function
 								}
 							}
 							cliCount--; // one less file descriptor
+							sprintf(closeMsg, "%s %d", SRVPREFIX, cliCount);
 							for(int u=0;u<20;u++)
 							{
 								if(fds[u].in_use==1)
