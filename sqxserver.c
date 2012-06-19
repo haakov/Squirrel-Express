@@ -31,6 +31,7 @@ int cliCount=0;
 
 char servCloseMsg[] = "srv close";
 char closeMsg[8]; // "srv 100" - 7 chars + one for \0
+char helloMsg[12]; // "srv hey 100" - 11 chars + one for \0
 
 int main(int argc, char *argv[]) // main function
 {
@@ -151,6 +152,7 @@ int main(int argc, char *argv[]) // main function
 						errorExit("accept()");
 					}
 				}
+
 				nonBlock(acceptSock); // we do not want our accepted socket to block
 				event.data.fd = acceptSock; // epoll_ctl foreplay
 				event.events = EPOLLIN | EPOLLET; // epoll_ctl foreplay
@@ -170,6 +172,8 @@ int main(int argc, char *argv[]) // main function
 					}
 				}
 				cliCount++; // we consider the amount of clients to have increased
+				sprintf(helloMsg, "%s hey %d", SRVPREFIX, cliCount); // Greet the client
+				write( acceptSock, helloMsg, sizeof(helloMsg) );
 				
 		}
 		else // data received on an accept()ed socket
