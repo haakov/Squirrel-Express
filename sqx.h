@@ -18,7 +18,7 @@ Author: hauk142
 
 int errorExit(char *failDesc) // function for exiting on error
 {
-	perror("failDesc");
+	perror(failDesc);
 	exit(EXIT_FAILURE);
 }
 
