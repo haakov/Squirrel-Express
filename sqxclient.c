@@ -85,7 +85,6 @@ void *stdRead()
 {
 	int n;
 	char buffer[512];
-	char *temp;
 
 	while (true) {
 		n = read( sock, buffer, sizeof(buffer) );
@@ -101,16 +100,28 @@ void *stdRead()
 			{
 				if( !strncmp( buffer, "srv close", 9 ) ) // If the server is closing down
 				{
-					puts("The server is closing down, Farewell World!");
+					puts("The server is closing down, Farewell World!"); // TODO: Write in Purple
 					cleanExit(1);
+				}
+				else if( !strncmp( buffer, "srv hey", 7) ) // Okay these two else ifs are a bit sketchy, but they work
+				{
+					puts("Welcome to the server!"); // TODO: Write in Purple
+					strtok(buffer, " ");
+					strtok(NULL, " ");
+					cliCount = atoi( strtok(NULL, " ") );
+					if(cliCount=1)
+						printf("There is currently %d client connected.\n", cliCount); // TODO: Write in Purple
+					else
+						printf("There are currently %d clients connected.\n", cliCount); // TODO: Write in Purple
 				}
 				else if( !strncmp( buffer, "srv", 3) ) // Someone has joined/left
 				{
-					temp = strtok(buffer, " ");
-					puts(temp);
+					strtok(buffer, " ");
 					cliCount = atoi( strtok(NULL, " ") );
-					printf("%d\n", cliCount);
-					memset( temp, NULL, sizeof(temp) );
+					if(cliCount=1)
+						printf("There is currently %d client connected.\n", cliCount); // TODO: Write in Purple
+					else
+						printf("There are currently %d clients connected.\n", cliCount); // TODO: Write in Purple
 				}
 
 			}
