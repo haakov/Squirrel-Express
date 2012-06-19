@@ -9,21 +9,21 @@ sqxclient.c - a tiny, simple chat client for use with the Squirrel Express chat 
 Author: Håkon Vågsether <hauk142@gmail.com>
 */
 
-void *stdRead(int *fd);
+void *stdRead();
 int sock, port; // TEH MAIN SOCKET
-void cleanExit();
+void cleanExit(int sentByThread);
 struct hostent *servur;                         /* The struct hostent pointer called servur */
 struct sockaddr_in serverAddress;               /* The server's address, in a sockaddr_in struct */
 char buf[20];
+int cliCount; 		// number of clients connected to the server
 
+pthread_t stdRead_T; 	// thread (stdRead.c)
 
 char closeMsg[] = "One of the clients has lost connection with the server.\n";
 char servCloseMsg[] = "Server has disconnected, farewell world!\n";
 
 int main(int argc, char *argv[]) // main function
 {
-	pthread_t stdRead_T; // thread (stdRead.c)
-
 	/* {{{ Command-line arguments */
 	if (argc<1 && (!(strcmp(argv[1], "--help")||strcmp(argv[1], "-h")))) {
 		printf("Squirrel Express Client, a simple chat client for use with the Squirrel Express server.\n");
@@ -40,12 +40,7 @@ int main(int argc, char *argv[]) // main function
 		exit(EXIT_FAILURE);
 	}
 	/* }}} */
-	// signal(SIGINT, cleanExit); // Ctrl+C calls the cleanExit function :33
-/*	
-	This is supposed to be anonymous, right?
-	printf("Pick a username: "); // prompt for username
-	fgets(username, sizeof(username), stdin); 
-*/	
+	signal(SIGINT, cleanExit); // Ctrl+C calls the cleanExit function :33
 
 	/* LET THERE BE BINDING */
 	sock = socket(AF_INET, SOCK_STREAM, 0); // initiate main socket
@@ -67,33 +62,72 @@ int main(int argc, char *argv[]) // main function
 		errorExit("connect()");
 	}
 
-	//pthread_create(&stdRead_T, NULL, stdRead, &sock);
+	pthread_create(&stdRead_T, NULL, stdRead, NULL);
 
-	fgets(buf, strlen(buf), stdin);
-	write(sock, buf, sizeof(buf));
+	while(true)
+	{
+		gets(buf); // Buffer overflow??
+		if( !strncmp( buf, "/q", 2 ) || !strncmp( buf, "/quit", 5 ) )
+		{
+			cleanExit(0);
+		}
+		write(sock, buf, sizeof(buf));
+		memset(buf, NULL, sizeof(buf));
+	}
 
-	//pthread_join(stdRead_T, NULL);
-	cleanExit();                            /* Die and exit */
+	cleanExit(0);                            /* Die and exit */
 	return 0;                               /* You will never get here >:) */
 }
 
 	
 	
-void *stdRead(int *fd)
+void *stdRead()
 {
+	int n;
 	char buffer[512];
+	char *temp;
 
 	while (true) {
-		fgets(buffer, sizeof(buffer), stdin); // receive user input
-		write(fd, buffer, sizeof(buffer)); // write to server
+		n = read( sock, buffer, sizeof(buffer) );
+		if(n<1)
+			errorExit("read()");
+		else
+		{
+			if( !strncmp( buffer, "msg", 3 ) ) // If someone said something
+			{
+				puts(buffer); 
+			}
+			else // If a server message was received
+			{
+				if( !strncmp( buffer, "srv close", 9 ) ) // If the server is closing down
+				{
+					puts("The server is closing down, Farewell World!");
+					cleanExit(1);
+				}
+				else if( !strncmp( buffer, "srv", 3) ) // Someone has joined/left
+				{
+					temp = strtok(buffer, " ");
+					puts(temp);
+					cliCount = atoi( strtok(NULL, " ") );
+					printf("%d\n", cliCount);
+					memset( temp, NULL, sizeof(temp) );
+				}
+
+			}
+			memset( buffer, NULL, sizeof(buffer) );
+		}
 	}
+	return 0;
 }
 
 
-void cleanExit()
+void cleanExit(int sentByThread)
 {
+	if(!sentByThread)
+			pthread_cancel(stdRead_T);
 	close(sock);
 	
+
 	printf("Closing connection...\n");
 	exit(EXIT_SUCCESS);
 }
