@@ -183,7 +183,8 @@ int main(int argc, char *argv[]) // main function
 					while(1)
 					{
 						char buf[512], finalBuf[512]; // buf is the buffer for receiving, finalBuf is the buffer for sending (we have to add "msg " to the start of the message)
-						bzero(buf, sizeof(buf));
+						bzero( buf, sizeof(buf) );
+						bzero( finalBuf, sizeof(finalBuf) );
 						readSock = read(events[i].data.fd, buf, sizeof(buf)); // read :D
 						if(readSock == -1)
 						{
