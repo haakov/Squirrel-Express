@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) // main function
 				{
 					while(1)
 					{
-						char buf[512];
+						char buf[512], finalBuf[512]; // buf is the buffer for receiving, finalBuf is the buffer for sending (we have to add "msg " to the start of the message)
 						bzero(buf, sizeof(buf));
 						readSock = read(events[i].data.fd, buf, sizeof(buf)); // read :D
 						if(readSock == -1)
@@ -214,11 +214,12 @@ int main(int argc, char *argv[]) // main function
 							}
 							break;
 						}
+						sprintf(finalBuf, "msg %s", buf);
 						for(int u=0;u<20;u++)
 						{
 							if(fds[u].in_use)
 							{
-								writeSock = write(fds[u].wFd, buf, sizeof(buf));
+								writeSock = write(fds[u].wFd, finalBuf, sizeof(finalBuf));
 							}
 						}
 					}
