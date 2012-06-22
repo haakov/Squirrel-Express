@@ -14,7 +14,7 @@ int sock, port; // TEH MAIN SOCKET
 void cleanExit(int sentByThread);
 struct hostent *servur;                         /* The struct hostent pointer called servur */
 struct sockaddr_in serverAddress;               /* The server's address, in a sockaddr_in struct */
-char buf[20];
+char buf[512];
 int cliCount; 		// number of clients connected to the server
 
 pthread_t stdRead_T; 	// thread (stdRead.c)
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) // main function
 	{
 		errorExit("gethostbyname()");   /* Everybody luvs error checking */
 	}
-    	bzero((char *) &serverAddress, sizeof(serverAddress));
+    	memset( (char *) &serverAddress, 0, sizeof(serverAddress) );
 	serverAddress.sin_family = AF_INET;
     	bcopy((char *)servur->h_addr, (char *)&serverAddress.sin_addr.s_addr, servur->h_length);
 	serverAddress.sin_port = htons(port = atoi(argv[2]));
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) // main function
 			cleanExit(0);
 		}
 		write(sock, buf, sizeof(buf));
-		memset(buf, NULL, sizeof(buf));
+		memset( buf, 0, sizeof(buf) );
 	}
 
 	cleanExit(0);                            /* Die and exit */
@@ -85,6 +85,8 @@ void *stdRead()
 {
 	int n;
 	char buffer[512];
+	char *bufro;
+	memset( buffer, 0, sizeof(buffer) );
 
 	while (true) {
 		n = read( sock, buffer, sizeof(buffer) );
@@ -94,7 +96,9 @@ void *stdRead()
 		{
 			if( !strncmp( buffer, "msg", 3 ) ) // If someone said something
 			{
-				puts(buffer); 
+				memset(buffer, 0, 3);
+				bufro = buffer+4;
+				puts(bufro); 
 			}
 			else // If a server message was received
 			{
@@ -109,7 +113,7 @@ void *stdRead()
 					strtok(buffer, " ");
 					strtok(NULL, " ");
 					cliCount = atoi( strtok(NULL, " ") );
-					if(cliCount=1)
+					if(cliCount==1)
 						printf("There is currently %d client connected.\n", cliCount); // TODO: Write in Purple
 					else
 						printf("There are currently %d clients connected.\n", cliCount); // TODO: Write in Purple
@@ -118,14 +122,14 @@ void *stdRead()
 				{
 					strtok(buffer, " ");
 					cliCount = atoi( strtok(NULL, " ") );
-					if(cliCount=1)
+					if(cliCount==1)
 						printf("There is currently %d client connected.\n", cliCount); // TODO: Write in Purple
 					else
 						printf("There are currently %d clients connected.\n", cliCount); // TODO: Write in Purple
 				}
 
 			}
-			memset( buffer, NULL, sizeof(buffer) );
+			memset( buffer, 0, sizeof(buffer) );
 		}
 	}
 	return 0;
