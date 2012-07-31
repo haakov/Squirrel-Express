@@ -24,7 +24,7 @@ char servCloseMsg[] = "Server has disconnected, farewell world!\n";
 
 int main(int argc, char *argv[]) // main function
 {
-	/* {{{ Command-line arguments */
+	/* {{{ Command-line arguments */ // TODO: Use getopt() instead!
 	if (argc<1 && (!(strcmp(argv[1], "--help")||strcmp(argv[1], "-h")))) {
 		printf("Squirrel Express Client, a simple chat client for use with the Squirrel Express server.\n");
 		printf("Developer can be contacted at hauk142 AT gmail DOT com.\n");

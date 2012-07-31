@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) // main function
 		{
 			if(!strcmp(argv[i], "--help")||!strcmp(argv[i], "-h"))  // it is important to notice the "!" signs in front of the "strcmp"s
 			{
-				printf("Squirrel Express Server 0.5 alpha, a simple chat server.\n");
+				printf("Squirrel Express Server 0.5 alpha, a simple chat server.\n"); // TODO: Use getopt() instead!
 				printf("Developer may be contacted at hauk142 AT gmail DOT com.\n");
 				printf("\n");
 				printf("Options:\n");
