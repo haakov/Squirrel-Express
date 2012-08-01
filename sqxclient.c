@@ -10,8 +10,10 @@ Author: Håkon Vågsether <hauk142@gmail.com>
 */
 
 void *stdRead();
-int sock, port; // TEH MAIN SOCKET
 void cleanExit(int sentByThread);
+int init_ncurses();
+
+int sock, port; // TEH MAIN SOCKET
 struct hostent *servur;                         /* The struct hostent pointer called servur */
 struct sockaddr_in serverAddress;               /* The server's address, in a sockaddr_in struct */
 char buf[512];
@@ -138,6 +140,7 @@ void *stdRead()
 
 void cleanExit(int sentByThread)
 {
+	endwin();
 	if(!sentByThread)
 			pthread_cancel(stdRead_T);
 	close(sock);
@@ -145,4 +148,19 @@ void cleanExit(int sentByThread)
 
 	printf("Closing connection...\n");
 	exit(EXIT_SUCCESS);
+}
+
+int init_ncurses()
+{
+	initscr();
+	getmaxyx(stdscr, row, col);
+	if(has_colors() == FALSE)
+		puts("has_colors() returned FALSE!\n");
+		return 1;
+	start_color();
+	
+	status=newwin(row-2, col, 1, 0);
+	delwin(status);
+
+	return 0;
 }
