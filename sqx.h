@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <string.h>
+#include <netinet/in.h>
 #include <strings.h>
 
 #ifndef SQX_H
@@ -21,5 +22,8 @@ int errorExit(char *failDesc) // function for exiting on error
 	perror(failDesc);
 	exit(EXIT_FAILURE);
 }
-
+#ifdef SQX_CLIENT
+	int row, col;
+	WINDOW* status; // The status bar window
+#endif
 #endif
