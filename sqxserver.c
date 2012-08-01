@@ -1,7 +1,6 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/epoll.h>
-#include <strings.h>
 #include "sqx.h"
 
 #define MAXEVENTS 64
