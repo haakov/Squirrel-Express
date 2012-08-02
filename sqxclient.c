@@ -65,6 +65,7 @@ int main(int argc, char *argv[]) // main function
 	}
 
 	pthread_create(&stdRead_T, NULL, stdRead, NULL);
+	init_ncurses();
 
 	while(true)
 	{
@@ -159,8 +160,6 @@ int init_ncurses()
 		return 1;
 	start_color();
 	
-	status=newwin(row-2, col, 1, 0);
-	delwin(status);
-
+	Wmessages=newwin(row-3, col, 1, 0);
 	return 0;
 }
