@@ -24,6 +24,6 @@ int errorExit(char *failDesc) // function for exiting on error
 }
 #ifdef SQX_CLIENT
 	int row, col;
-	WINDOW* status; // The status bar window
+	WINDOW* Wmessages; // The status bar window
 #endif
 #endif
