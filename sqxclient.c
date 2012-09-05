@@ -101,7 +101,8 @@ void *stdRead()
 			{
 				memset(buffer, 0, 3);
 				bufro = buffer+4;
-				puts(bufro); 
+				wprintw(Wmessages, "%s", bufro);
+				wrefresh(Wmessages);
 			}
 			else // If a server message was received
 			{
@@ -159,7 +160,10 @@ int init_ncurses()
 		puts("has_colors() returned FALSE!\n");
 		return 1;
 	start_color();
+	move(row-1, 0);
 	
 	Wmessages=newwin(row-3, col, 1, 0);
+	idlok(Wmessages, TRUE);
+	scrollok(Wmessages, TRUE);
 	return 0;
 }
