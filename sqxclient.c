@@ -75,6 +75,7 @@ int main(int argc, char *argv[]) // main function
 			cleanExit(0);
 		}
 		write(sock, buf, sizeof(buf));
+		move(row-1, 0);
 		memset( buf, 0, sizeof(buf) );
 	}
 
@@ -103,6 +104,8 @@ void *stdRead()
 				bufro = buffer+4;
 				wprintw(Wmessages, "%s", bufro);
 				wrefresh(Wmessages);
+				move(row-1, 0);
+				refresh();
 			}
 			else // If a server message was received
 			{
@@ -163,7 +166,6 @@ int init_ncurses()
 	}
 	start_color();
 	move(row-1, 0);
-	
 	Wmessages=newwin(row-3, col, 1, 0);
 	idlok(Wmessages, TRUE);
 	scrollok(Wmessages, TRUE);
