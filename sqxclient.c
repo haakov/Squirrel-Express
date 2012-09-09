@@ -157,8 +157,10 @@ int init_ncurses()
 	initscr();
 	getmaxyx(stdscr, row, col);
 	if(has_colors() == FALSE)
+	{
 		puts("has_colors() returned FALSE!\n");
 		return 1;
+	}
 	start_color();
 	move(row-1, 0);
 	
