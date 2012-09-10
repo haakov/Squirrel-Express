@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) // main function
 		errorExit("connect()");
 	}
 
-	pthread_create(&stdRead_T, NULL, stdRead, NULL);
 	init_ncurses();
+	pthread_create(&stdRead_T, NULL, stdRead, NULL);
 
 	while(true)
 	{
@@ -122,7 +122,7 @@ void *stdRead()
 				else if( !strncmp( buffer, "srv hey", 7) ) // Okay these two else ifs are a bit sketchy, but they work
 				{
 					wattron(Wmessages, COLOR_PAIR(1));
-//					wprintw(Wmessages, "Welcome to the server!\n");
+					wprintw(Wmessages, "Welcome to the server!\n");
 					strtok(buffer, " ");
 					strtok(NULL, " ");
 					cliCount = atoi( strtok(NULL, " ") );
