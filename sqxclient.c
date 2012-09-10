@@ -69,13 +69,14 @@ int main(int argc, char *argv[]) // main function
 
 	while(true)
 	{
-		gets(buf); // Buffer overflow??
+		getstr(buf); // TODO: Buffer overflow?
 		if( !strncmp( buf, "/q", 2 ) || !strncmp( buf, "/quit", 5 ) )
 		{
 			cleanExit(0);
 		}
 		write(sock, buf, sizeof(buf));
 		move(row-1, 0);
+		clrtoeol();
 		memset( buf, 0, sizeof(buf) );
 	}
 
@@ -102,7 +103,7 @@ void *stdRead()
 			{
 				memset(buffer, 0, 3);
 				bufro = buffer+4;
-				wprintw(Wmessages, "%s", bufro);
+				wprintw(Wmessages, "%s\n", bufro);
 				wrefresh(Wmessages);
 				move(row-1, 0);
 				refresh();
@@ -111,28 +112,38 @@ void *stdRead()
 			{
 				if( !strncmp( buffer, "srv close", 9 ) ) // If the server is closing down
 				{
-					puts("The server is closing down, Farewell World!"); // TODO: Write in Purple
+					wattron(Wmessages, COLOR_PAIR(1));
+					wprintw(Wmessages, "The server is closing down, Farewell World!\n"); 
+					move(row-1, 0);
+					wrefresh(Wmessages);
+					wattroff(Wmessages, COLOR_PAIR(1));
 					cleanExit(1);
 				}
 				else if( !strncmp( buffer, "srv hey", 7) ) // Okay these two else ifs are a bit sketchy, but they work
 				{
-					puts("Welcome to the server!"); // TODO: Write in Purple
+					wattron(Wmessages, COLOR_PAIR(1));
+//					wprintw(Wmessages, "Welcome to the server!\n");
 					strtok(buffer, " ");
 					strtok(NULL, " ");
 					cliCount = atoi( strtok(NULL, " ") );
 					if(cliCount==1)
-						printf("There is currently %d client connected.\n", cliCount); // TODO: Write in Purple
+						wprintw(Wmessages, "There is currently %d client connected.\n", cliCount); 
 					else
-						printf("There are currently %d clients connected.\n", cliCount); // TODO: Write in Purple
+						wprintw(Wmessages, "There are currently %d clients connected.\n", cliCount); 
+					wrefresh(Wmessages);
+					wattroff(Wmessages, COLOR_PAIR(1));
 				}
 				else if( !strncmp( buffer, "srv", 3) ) // Someone has joined/left
 				{
+					wattron(Wmessages, COLOR_PAIR(1));
 					strtok(buffer, " ");
 					cliCount = atoi( strtok(NULL, " ") );
 					if(cliCount==1)
-						printf("There is currently %d client connected.\n", cliCount); // TODO: Write in Purple
+						wprintw(Wmessages, "There is currently %d client connected.\n", cliCount); 
 					else
-						printf("There are currently %d clients connected.\n", cliCount); // TODO: Write in Purple
+						wprintw(Wmessages, "There are currently %d clients connected.\n", cliCount); 
+					wrefresh(Wmessages);
+					wattroff(Wmessages, COLOR_PAIR(1));
 				}
 
 			}
@@ -165,6 +176,7 @@ int init_ncurses()
 		return 1;
 	}
 	start_color();
+	init_pair(1, COLOR_MAGENTA, COLOR_BLACK);
 	move(row-1, 0);
 	Wmessages=newwin(row-3, col, 1, 0);
 	idlok(Wmessages, TRUE);
