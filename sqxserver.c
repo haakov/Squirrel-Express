@@ -173,6 +173,14 @@ int main(int argc, char *argv[]) // main function
 				cliCount++; // we consider the amount of clients to have increased
 				sprintf(helloMsg, "%s hey %d", SRVPREFIX, cliCount); // Greet the client
 				write( acceptSock, helloMsg, sizeof(helloMsg) );
+				sprintf(closeMsg, "%s %d", SRVPREFIX, cliCount);
+				for(int u=0;u<20;u++)
+				{
+					if(fds[u].in_use==1)
+					{
+						writeSock = write(fds[u].wFd, closeMsg, sizeof(closeMsg));
+					}
+				}
 				
 		}
 		else // data received on an accept()ed socket
