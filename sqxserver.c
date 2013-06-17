@@ -1,45 +1,48 @@
-#include <string.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/epoll.h>
-#include <unistd.h>
-#include <strings.h>
 #include "sqx.h"
 
 #define MAXEVENTS 64
+#define SRVPREFIX "srv"
 
 /*
 sqxserver.c - a tiny, simple chat server for use with the Squirrel Express chat client
 Author: Håkon Vågsether <hauk142@gmail.com>
 */
 
-int sock; // declare main socket
+int sock, readSock, writeSock; // declare main socket
 struct epoll_event *events; // the pointer epoll_event struct
 
 
 void cleanExit();
 void nonBlock(int fd); 
 
+typedef struct // for communication between events[i].data.fd and the file descriptors to write to
+{
+	int in_use; // int to indicate if the integers below are in use
+	int rFd; // events[i].data.fd
+	int wFd; // file descriptor to write to
+} fd;
+fd fds[20];
+
+int cliCount=0;
+
+char servCloseMsg[] = "srv close";
+char closeMsg[8]; // "srv 100" - 7 chars + one for \0
+char helloMsg[12]; // "srv hey 100" - 11 chars + one for \0
 
 int main(int argc, char *argv[]) // main function
 {
-	/* TODO: implement epoll */
+	/* TODO: implement epoll */             /* stfu */
 	/* TODO: Declaration sector starts here */
 	int yes=1; // for Beej's "address in use"-loser
-	int bindSock, portNum=33730, e; // socket for binding to the port. Also, lets have our portnumber as a variable, so we can change it later with the "-p" flag. An extra e integer for error checking
-	int epfd, cliCount=1; // the EPOLL file descriptor, and an integer for keeping track of how many clients we have connected, so it doesn't exceed our limit, which is currently 20
+	int bindSock, portNum=33730, e; // socket for binding to the port. Also, lets have our portnumber as a variable, so we can change it later with the "-p" flag. An extra integer, e, for error checking
+	int epfd; // the EPOLL file descriptor, and an integer for keeping track of how many clients we have connected, so it doesn't exceed our limit, which is currently 20
 	struct sockaddr_in servAddr; // sockaddr_in struct for the main socket
 	struct epoll_event event; // the normal epoll struct
-	char closeMsg[] = "Warning: One of the clients has lost connection with the server.\n";
 	events = calloc(MAXEVENTS, sizeof(event));
 	
-	typedef struct // for communication between events[i].data.fd and the file descriptors to write to
-	{
-		int in_use; // int to indicate if the integers below are in use
-		int rFd; // events[i].data.fd
-		int wFd; // file descriptor to write to
-	} fd;
-	fd fds[20];
 
 	/* Declaration sector ends here */
 	
@@ -126,14 +129,14 @@ int main(int argc, char *argv[]) // main function
 		errorExit("epoll_ctl()");
 	}
 	
-	/* TODO: lo and behold, the mighty while loop! */
+	/* lo and behold, the mighty while loop! */
 	
 	while(1)
 	{
 		e = epoll_wait(epfd, events, MAXEVENTS, -1); // the epoll_wait call
-		for(int i=0;i<cliCount;i++)
+		for(int i=0;i<=cliCount;i++)
 		{
-			if(sock==events[i].data.fd) // we have activity on a listening socket, which means someone is trying to connect
+			if(sock==events[i].data.fd && cliCount<=100) // we have activity on a listening socket, which means someone is trying to connect. Accept unless we're full
 			{
 				int acceptSock; // the file descriptor for each client
 				struct sockaddr_in cliAddr; // the struct for the client address
@@ -148,6 +151,7 @@ int main(int argc, char *argv[]) // main function
 						errorExit("accept()");
 					}
 				}
+
 				nonBlock(acceptSock); // we do not want our accepted socket to block
 				event.data.fd = acceptSock; // epoll_ctl foreplay
 				event.events = EPOLLIN | EPOLLET; // epoll_ctl foreplay
@@ -167,6 +171,16 @@ int main(int argc, char *argv[]) // main function
 					}
 				}
 				cliCount++; // we consider the amount of clients to have increased
+				sprintf(helloMsg, "%s hey %d", SRVPREFIX, cliCount); // Greet the client
+				write( acceptSock, helloMsg, sizeof(helloMsg) );
+				sprintf(closeMsg, "%s %d", SRVPREFIX, cliCount);
+				for(int u=0;u<20;u++)
+				{
+					if(fds[u].in_use==1)
+					{
+						writeSock = write(fds[u].wFd, closeMsg, sizeof(closeMsg));
+					}
+				}
 				
 		}
 		else // data received on an accept()ed socket
@@ -175,9 +189,9 @@ int main(int argc, char *argv[]) // main function
 				{
 					while(1)
 					{
-						char buf[512];
-						int readSock, writeSock;
-						bzero(buf, sizeof(buf));
+						char buf[512], finalBuf[512]; // buf is the buffer for receiving, finalBuf is the buffer for sending (we have to add "msg " to the start of the message)
+						bzero( buf, sizeof(buf) );
+						bzero( finalBuf, sizeof(finalBuf) );
 						readSock = read(events[i].data.fd, buf, sizeof(buf)); // read :D
 						if(readSock == -1)
 						{
@@ -192,12 +206,13 @@ int main(int argc, char *argv[]) // main function
 							close(events[i].data.fd); // close the file descriptor
 							for(int u=0;u<20;u++)
 							{
-								if(fds[u].rFd == events[i].data.fd)
+								if(fds[u].wFd == events[i].data.fd)
 								{
 									fds[u].in_use = 0;
 								}
 							}
 							cliCount--; // one less file descriptor
+							sprintf(closeMsg, "%s %d", SRVPREFIX, cliCount);
 							for(int u=0;u<20;u++)
 							{
 								if(fds[u].in_use==1)
@@ -207,11 +222,12 @@ int main(int argc, char *argv[]) // main function
 							}
 							break;
 						}
+						sprintf(finalBuf, "msg %s", buf);
 						for(int u=0;u<20;u++)
 						{
-							if(fds[u].in_use==1)
+							if(fds[u].in_use)
 							{
-								writeSock = write(fds[u].wFd, buf, sizeof(buf));
+								writeSock = write(fds[u].wFd, finalBuf, sizeof(finalBuf));
 							}
 						}
 					}
@@ -247,6 +263,15 @@ void nonBlock(int fd) // fd to set to nonblocking mode
 
 void cleanExit()
 {
+	
+	for(int u=0;u<20;u++)
+	{
+		if(fds[u].in_use==1)
+		{
+			writeSock = write(fds[u].wFd, servCloseMsg, sizeof(servCloseMsg));
+		}
+	}
+	/* send shutdown message to all of the clients */
 	close(sock);
 	free(events);
 	for(int i=1;i<MAXEVENTS;i++)
