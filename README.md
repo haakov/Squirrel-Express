@@ -5,8 +5,8 @@ Usage
 
 Start the server:
 
-        $ ./sqxs
+    $ ./sqxs
   
 Connect the client:
 
-        $ ./sqxc localhost 33730
+    $ ./sqxc localhost 33730
