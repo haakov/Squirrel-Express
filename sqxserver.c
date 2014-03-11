@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) // main function
 	}
 	else
 	{
-		printf("Squirrel Express 0.5 alpha\n");
+		printf("Squirrel Express 0.5\n");
 		printf("Exit with ^C or SIGINT.\n"); 
 	}
 	/* command-line arguments sector ends here */
